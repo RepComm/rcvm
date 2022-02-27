@@ -6,6 +6,7 @@
 #include <sys/ioctl.h>
 
 // #include "./rcvm.c"
+#include "./fileutils.c"
 #include "./rcvm.asm.c"
 
 bool doLoop;
@@ -30,7 +31,18 @@ int main(int argc, char **argv) {
   // allocation and setup
   init();
 
-  asmToBin("set 0 0xDEADBEEF\nset 1 0\nset 2 1\nlabel loopstart\nadd 1 2\ncompare 0 1\njump lessthan loopstart\nlabel loopend");
+  struct TextFile f;
+  f.fname = "./src/main.rcvm.asm";
+  if (!TextFile_read(&f)) {
+    printf("couldn't read assembly file");
+    TextFile_clear(&f);
+    return -1;
+  }
+  // printf("read file: %s", f.data);
+  asmToBin(f.data);
+
+  TextFile_clear(&f);
+
 
   // while (doLoop) {
   //   rcvm_step(vm);

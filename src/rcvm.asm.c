@@ -37,23 +37,23 @@ void asmToBin (str src) {
 
   str line;
 
-  struct str_split_info splitSpaceInfo;
   
   for (int i=0; i<splitLineInfo.splitStringsCount; i++) {
     line = splitLineInfo.splitStrings[i];
+    if (strlen(line) < 1) continue;
+    struct str_split_info splitSpaceInfo;
     
-    splitSpaceInfo.source = splitLineInfo.splitStrings[i];
+    splitSpaceInfo.source = line;
     splitSpaceInfo.delimiter = " ";
 
     str_split_begin(&splitSpaceInfo);
     
-    if (splitSpaceInfo.splitStringsCount > 0) {
-      printf("asm cmd: %s\n", splitSpaceInfo.splitStrings[0]);
-    }
-    // for (int j=0; j < splitSpaceInfo.splitStringsCount; j++) {
+    if (splitSpaceInfo.splitStringsCount < 1) continue;
 
-    // }
+    if (splitSpaceInfo.splitStrings[0][0] == '#') continue;
 
+    printf("asm cmd: %s\n", splitSpaceInfo.splitStrings[0]);
+    
     str_split_end(&splitSpaceInfo);
   }
 

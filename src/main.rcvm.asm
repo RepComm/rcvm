@@ -65,5 +65,3 @@ compare 0 1
 jump lessthan loopstart
 
 label loopend
-
-
