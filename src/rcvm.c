@@ -10,10 +10,17 @@
 struct rcvm_flags {
 
   str error;
+
+  enum asm_compare compare_result;
 };
 
 struct rcvm {
   struct rcvm_flags flags;
+  int programCounter;
+  datap programData;
+  datap programMemory;
+  datap programStack;
+  datap programHeap;
 };
 
 #define rcvmp struct rcvm *
@@ -29,8 +36,46 @@ void rcvm_destroy (rcvmp vm) {
   free(vm);
 }
 
-void rcvm_step (rcvmp vm) {
+struct asm_datum rcvm_step_datum;
 
+void rcvm_step (rcvmp vm) {
+  fetch(vm->programData, vm->programCounter, &rcvm_step_datum);
+  
+  switch (rcvm_step_datum.cmd) {
+    case m_noop:
+      break; //no operation
+
+    case m_push:
+      break;
+    case m_pop:
+      break;
+
+    case m_set:
+      break;
+      
+    case m_add:
+      break;
+    case m_sub:
+      break;
+    case m_mul:
+      break;
+    case m_div:
+      break;
+    
+    case m_compare:
+      break;
+
+    case m_load:
+      break;
+    case m_store:
+      break;
+    
+    
+    case m_jump:
+      break;
+  }
+
+  vm->programData[vm->programCounter];
 }
 
 void rcvm_load_src (rcvmp vm, str src) {

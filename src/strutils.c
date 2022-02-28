@@ -10,7 +10,7 @@
 #include <stdbool.h>
 #include <string.h>
 
-#include <stdio.h>
+// #include <stdio.h>
 
 struct str_split_info {
   /* The string to be split
@@ -52,6 +52,7 @@ void str_split_begin (str_split_infop info) {
   info->splitStringsCount = 0;
 
   int sourceLength = strlen(info->source);
+  if (sourceLength < 1) return;
   int sourceOffset = 0;
   char sourceChar;
 
@@ -187,21 +188,23 @@ void str_split_end (str_split_infop info) {
   }
 }
 
-void str_split_test () {
+// void str_split_test () {
   
-  struct str_split_info info;
-  info.source = "hello world this is a test";
-  info.delimiter = " ";
+//   struct str_split_info info;
+//   info.source = "hello world this is a test";
+//   info.delimiter = " ";
 
-  str_split_begin (&info);
+//   str_split_begin (&info);
 
-  //iterate thru split substrings
-  //NOTE: removed/memory cleanup after str_split_end
-  for (int i=0; i<info.splitStringsCount; i++) {
-    //  info.splitStrings[i];
-  }
+//   //iterate thru split substrings
+//   //NOTE: removed/memory cleanup after str_split_end
+//   for (int i=0; i<info.splitStringsCount; i++) {
+//     //  info.splitStrings[i];
+//   }
 
-  str_split_end(&info);
-}
+//   str_split_end(&info);
+// }
+
+bool str_equal (const char *a, const char *b) { return strcmp(a, b) == 0; }
 
 #endif
