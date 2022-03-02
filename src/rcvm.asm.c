@@ -3,13 +3,16 @@
 #define RCVM_ASM C 1
 
 #include <string.h>
-// #include "./flexbin.c"
 #include "./defs.c"
 #include "./strutils.c"
 
 enum asm_compare {
+  /**includes all subsequent states when compared*/
   compare_always,
+
   compare_equal,
+  
+  /**includes greaterthan and lessthan when compared*/
   compare_unequal,
   compare_greaterthan,
   compare_lessthan,
@@ -56,6 +59,54 @@ struct asm_datum {
 
   unsigned int ramAddress;
 };
+
+int cmd_full_size (enum asm_cmd cmd) {
+  //start with command char size
+  int result = sizeof(unsigned char);
+
+  //append sizes per command specifics
+  switch (cmd) {
+  case m_jump:
+    //jump condition
+    result += sizeof(unsigned char);
+    //landing spot
+    result += sizeof(unsigned int);
+    break;
+  case m_push:
+  case m_pop:
+    //registers byte
+    result += sizeof(unsigned short);
+    break;
+  case m_set:
+    //registerA
+    result += sizeof(unsigned char);
+    
+    //int value
+    result += sizeof(int);
+    break;
+  case m_add:
+  case m_sub:
+  case m_mul:
+  case m_div:
+  case m_compare:
+    //registerA
+    result += sizeof(unsigned char);
+    //registerB
+    result += sizeof(unsigned char);
+    break;
+  case m_load:
+  case m_store:
+    //registerA
+    result += sizeof(unsigned char);
+    
+    //ramAddress
+    result += sizeof(unsigned int);
+    break;
+  default:
+    break;
+  }
+  return result;
+}
 
 //https://stackoverflow.com/a/11314653/8112809
 //http://gcc.gnu.org/onlinedocs/gcc/Structures-unions-enumerations-and-bit_002dfields-implementation.html
@@ -133,7 +184,7 @@ void asmToBin (str src) {
   str_split_begin(&splitLineInfo);
 
   str line;
-
+  int totalByteLength = 0;
   
   for (int i=0; i<splitLineInfo.splitStringsCount; i++) {
     line = splitLineInfo.splitStrings[i];
@@ -148,11 +199,22 @@ void asmToBin (str src) {
 
     if (splitSpaceInfo.splitStrings[0][0] == '#') continue;
 
+    if (str_equal(splitSpaceInfo.splitStrings[0], "label")) continue;
+
     int cmdId = asm_cmd_from_str(splitSpaceInfo.splitStrings[0]);
-    printf("%s -> %i\n", splitSpaceInfo.splitStrings[0], cmdId);
+    int cmdByteLength = cmd_full_size(cmdId);
+    totalByteLength += cmdByteLength;
+    printf(
+      "%02hhX -> %s : %i bytes\n",
+      cmdId,
+      splitSpaceInfo.splitStrings[0],
+      cmdByteLength
+    );
     
     str_split_end(&splitSpaceInfo);
   }
+
+  printf("program takes %i bytes of EEPROM", totalByteLength);
 
   str_split_end(&splitLineInfo);
 }
