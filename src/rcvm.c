@@ -141,7 +141,7 @@ void rcvm_load_src (rcvmp vm, str src) {
 }
 
 void rcvm_load_asm (rcvmp vm, str src) {
-  asmToBin(src);
+  assemble_begin(src);
 
   // rcvm_load_asmbin(vm, bin);
 }

@@ -175,7 +175,7 @@ enum asm_cmd asm_cmd_from_str (str cmd) {
   return -1;
 }
 
-void asmToBin (str src) {
+int asmToBinSize (str src) {
   
   struct str_split_info splitLineInfo;
   splitLineInfo.source = src;
@@ -204,6 +204,68 @@ void asmToBin (str src) {
     int cmdId = asm_cmd_from_str(splitSpaceInfo.splitStrings[0]);
     int cmdByteLength = cmd_full_size(cmdId);
     totalByteLength += cmdByteLength;
+    // printf(
+    //   "%02hhX -> %s : %i bytes\n",
+    //   cmdId,
+    //   splitSpaceInfo.splitStrings[0],
+    //   cmdByteLength
+    // );
+    
+    str_split_end(&splitSpaceInfo);
+  }
+
+  // printf("program takes %i bytes of EEPROM", totalByteLength);
+
+  str_split_end(&splitLineInfo);
+  return totalByteLength;
+}
+
+struct asm_to_bin_info {
+  str src;
+  datap result;
+  int resultByteLength;
+};
+#define asm_to_bin_infop struct asm_to_bin_info *
+
+void assemble_begin (asm_to_bin_infop info) {
+  if (info->src == NULL) return;
+  info->resultByteLength = asmToBinSize(info->src);
+  info->result = (unsigned char *) malloc(
+    sizeof(char) * info->resultByteLength
+  );
+  memset(info->result, 0x00, info->resultByteLength);
+
+  struct str_split_info splitLineInfo;
+  splitLineInfo.source = info->src;
+  splitLineInfo.delimiter = "\n";
+
+  str_split_begin(&splitLineInfo);
+
+  str line;
+  int resultOffset = 0;
+  
+  for (int i=0; i<splitLineInfo.splitStringsCount; i++) {
+    line = splitLineInfo.splitStrings[i];
+    struct str_split_info splitSpaceInfo;
+    
+    splitSpaceInfo.source = line;
+    splitSpaceInfo.delimiter = " ";
+
+    str_split_begin(&splitSpaceInfo);
+    
+    if (splitSpaceInfo.splitStringsCount < 1) continue;
+
+    if (splitSpaceInfo.splitStrings[0][0] == '#') continue;
+
+    if (str_equal(splitSpaceInfo.splitStrings[0], "label")) continue;
+
+    unsigned char cmdId = asm_cmd_from_str(splitSpaceInfo.splitStrings[0]);
+    int cmdByteLength = cmd_full_size(cmdId);
+
+    info->result[resultOffset] = cmdId;
+
+    resultOffset += cmdByteLength;
+
     printf(
       "%02hhX -> %s : %i bytes\n",
       cmdId,
@@ -214,9 +276,18 @@ void asmToBin (str src) {
     str_split_end(&splitSpaceInfo);
   }
 
-  printf("program takes %i bytes of EEPROM", totalByteLength);
+  printf("program takes %i bytes of EEPROM\n", info->resultByteLength);
 
   str_split_end(&splitLineInfo);
+}
+
+void assemble_end (asm_to_bin_infop info) {
+  if (info->result != NULL) {
+  free(info->result);
+  info->result = NULL;
+  }
+  info->resultByteLength = 0;
+  info->src = NULL;
 }
 
 #endif

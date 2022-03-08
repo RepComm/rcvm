@@ -43,4 +43,24 @@ void TextFile_clear (TextFileP f) {
   f->dataLength = 0;
 }
 
+struct BinFile {
+  str fname;
+  datap data;
+  long dataLength;
+};
+#define BinFileP struct BinFile *
+
+bool BinFile_write(BinFileP bf) {
+  FILE * f;
+
+  f = fopen(bf->fname, "wb");
+  if (f == NULL) return false;
+
+  fwrite(bf->data, bf->dataLength, 1, f);
+  
+  fclose(f);
+
+  return true;
+}
+
 #endif

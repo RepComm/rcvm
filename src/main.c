@@ -15,7 +15,7 @@ bool doLoop;
 
 void init() {
   doLoop = true;
-
+  
   // vm = rcvm_create();
 
   // rcvm_parse(vm, "");
@@ -39,7 +39,30 @@ int main(int argc, char **argv) {
     return -1;
   }
   // printf("read file: %s", f.data);
-  asmToBin(f.data);
+  struct asm_to_bin_info info;
+  info.src = f.data;
+
+  assemble_begin(&info);
+
+  for (int i=0; i<info.resultByteLength;) {
+    for (int j=0; j<16; j++) {
+      if (i > info.resultByteLength-1) break;
+      printf(
+        "%02hhX ",
+        info.result[i]
+      );
+      i++;
+    }
+    printf("\n");
+  }
+
+  struct BinFile outFile;
+  outFile.fname = "./main.rcvm.o";
+  outFile.data = info.result;
+  outFile.dataLength = info.resultByteLength;
+  BinFile_write(&outFile);
+
+  assemble_end(&info);
 
   TextFile_clear(&f);
 
