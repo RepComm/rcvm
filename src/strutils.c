@@ -207,4 +207,11 @@ void str_split_end (str_split_infop info) {
 
 bool str_equal (const char *a, const char *b) { return strcmp(a, b) == 0; }
 
+//https://stackoverflow.com/a/4770992/8112809
+bool str_startswith(const char *prefix, str s) {
+  return strncmp(prefix, s, strlen(prefix)) == 0;
+}
+
+
+
 #endif
